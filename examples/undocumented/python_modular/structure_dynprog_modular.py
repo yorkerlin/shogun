@@ -4,6 +4,7 @@
 
 parameter_list=[['../data/DynProg_example_py.pickle.gz']]
 
+import sys
 from modshogun import *
 
 import numpy
@@ -15,6 +16,16 @@ from numpy import array,Inf,float64,matrix,frompyfunc,zeros
 import gzip
 import scipy
 from scipy.io import loadmat
+
+try:
+	from pickle import _Unpickler as Unpickler
+except ImportError:
+	from pickle import Unpickler as Unpickler
+
+try:
+	from pickle import _Pickler as Pickler
+except ImportError:
+	from pickle import Pickler as Pickler
 
 import pickle
 
@@ -33,15 +44,15 @@ def get_ver(ver_str):
 if get_ver(scipy.__version__) >= get_ver('0.7.0'):
 	renametable = {
 			'scipy.io.mio5': 'scipy.io.matlab.mio5',
-			'scipy.sparse.sparse' : 'scipy.sparse',
+			'scipy.sparse.sparse': 'scipy.sparse'
 			}
 else:
 	renametable = {}
 
 def mapname(name):
-	if name in renametable:
-		return renametable[name]
-	return name
+	if name.decode('UTF-8') in renametable:
+		return renametable[name.decode('UTF-8')]
+	return name.decode('UTF-8')
 
 # scipy compatibility class
 class mat_struct(object):
@@ -58,10 +69,30 @@ def mapped_load_global(self):
 
 	self.append(klass)
 
+def mapped_load_reduce(self):
+	stack = self.stack
+	args = stack.pop()
+	func = stack[-1]
+	try:
+		value = func(*args)
+	except:
+		try:
+			helper = args[0], args[1].encode('LATIN-1')
+			value = func(*helper)
+		except:
+			print(sys.exc_info())
+			print(func, args)
+			raise
+	stack[-1] = value
+
 def loads(str):
 	file = StringIO(str)
-	unpickler = pickle.Unpickler(file)
-	unpickler.dispatch[pickle.GLOBAL] = mapped_load_global
+	try:
+		unpickler = Unpickler(file, encoding='LATIN-1')
+	except:
+		unpickler = Unpickler(file)
+	unpickler.dispatch[pickle.GLOBAL[0]] = mapped_load_global
+	unpickler.dispatch[pickle.REDUCE[0]] = mapped_load_reduce
 	return unpickler.load()
 
 def structure_dynprog_modular (fname):
