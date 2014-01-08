@@ -16,7 +16,10 @@ def serialization_svmlight_modular (num, dist, width, C):
     try:
         import cPickle as pickle
     except ImportError:
-        import pickle as pickle
+        try:
+            import pickle._Pickler as pickle
+        except ImportError:
+            import pickle as pickle
     import inspect
 
 
