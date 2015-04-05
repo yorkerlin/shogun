@@ -86,12 +86,14 @@ SGMatrix<float64_t> CLinearARDKernel::compute_right_product(SGVector<float64_t>r
 
 		SGMatrix<float64_t> rtmp(right_vec.vector,right_vec.vlen,1,false);
 
+		std::cout<<__FILE__<<" at "<<__LINE__<<std::endl;
 		if(m_ARD_type==KT_DIAG)
 			linalg::elementwise_product(m_weights, rtmp, right);
 		else if(m_ARD_type==KT_FULL)
 			linalg::matrix_product(m_weights, rtmp, right);
 		else
 			SG_ERROR("Unsupported ARD type\n");
+		showmat(right);
 	}
 	return right;
 }
@@ -112,6 +114,7 @@ float64_t CLinearARDKernel::compute_helper(SGVector<float64_t> avec, SGVector<fl
 
 		SGMatrix<float64_t> ltmp(avec.vector,avec.vlen,1,false);
 
+		std::cout<<__FILE__<<" at "<<__LINE__<<std::endl;
 		SGMatrix<float64_t> left_transpose(left.matrix,left.num_cols,1,false);
 		if(m_ARD_type==KT_DIAG)
 			linalg::elementwise_product(m_weights, ltmp, left_transpose);
@@ -119,11 +122,14 @@ float64_t CLinearARDKernel::compute_helper(SGVector<float64_t> avec, SGVector<fl
 			linalg::matrix_product(m_weights, ltmp, left_transpose);
 		else
 			SG_ERROR("Unsupported ARD type\n");
+		showmat(left_transpose);
 	}
 
 	SGMatrix<float64_t> res(1,1);
 	SGMatrix<float64_t> right=compute_right_product(bvec, scalar_weight);
+	std::cout<<__FILE__<<" at "<<__LINE__<<std::endl;
 	linalg::matrix_product(left, right, res);
+	showmat(res);
 	return res[0]*scalar_weight;
 }
 
@@ -152,6 +158,7 @@ float64_t CLinearARDKernel::compute_gradient_helper(SGVector<float64_t> avec,
 		SGMatrix<float64_t> right(bvec.vector,bvec.vlen,1,false);
 		SGMatrix<float64_t> res(1,1);
 
+		std::cout<<__FILE__<<" at "<<__LINE__<<std::endl;
 		if (m_ARD_type==KT_SCALAR)
 		{
 			linalg::matrix_product(left, right, res);
@@ -178,7 +185,7 @@ float64_t CLinearARDKernel::compute_gradient_helper(SGVector<float64_t> avec,
 		{
 			SG_ERROR("Unsupported ARD type\n");
 		}
-
+		showmat(res);
 	}
 	return result*scale;
 }

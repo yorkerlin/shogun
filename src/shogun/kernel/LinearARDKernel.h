@@ -10,16 +10,43 @@
  * Adapted from WeightedDegreeRBFKernel.h
  */
 
+#ifndef SHOWMAT
+#define SHOWMAT
+#include<iostream>
+#include <shogun/lib/SGMatrix.h>
+#include <shogun/lib/SGVector.h>
+namespace shogun
+{
+static void showmat(SGMatrix<float64_t> mat)
+{
+	for(int i=0;i<mat.num_rows;i++)
+	{
+		for(int j=0;j<mat.num_cols;j++)
+		{
+			std::cout<<mat(i,j)<<" ";
+		}
+		std::cout<<std::endl;
+	}
+}
+static void showvec(SGVector<float64_t> vec)
+{
+	for(int i=0;i<vec.vlen;i++)
+	{
+		std::cout<<vec[i]<<" ";
+	}
+	std::cout<<std::endl;
+}
+}
+#endif
+
 #ifndef LINEARARDKERNEL_H
 #define LINEARARDKERNEL_H
 #include <shogun/lib/config.h>
-
 #include <shogun/lib/common.h>
 #include <shogun/kernel/DotKernel.h>
 
 namespace shogun
 {
-
 enum EARDKernelType
 {
 	KT_SCALAR=10,

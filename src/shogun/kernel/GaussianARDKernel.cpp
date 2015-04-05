@@ -124,7 +124,9 @@ float64_t CGaussianARDKernel::get_parameter_gradient_helper(
 
 	if (!strcmp(param->m_name, "weights"))
 	{
+		std::cout<<__FILE__<<" at "<<__LINE__<<std::endl;
 		linalg::add(avec, bvec, bvec, 1.0, -1.0);
+		showvec(bvec);
 		float64_t scale=-kernel(idx_a,idx_b)/m_width;
 		return	compute_gradient_helper(bvec, bvec, scale, index);
 	}
@@ -192,7 +194,9 @@ float64_t CGaussianARDKernel::distance(int32_t idx_a, int32_t idx_b)
 
 	SGVector<float64_t> avec=((CDotFeatures *)lhs)->get_computed_dot_feature_vector(idx_a);
 	SGVector<float64_t> bvec=((CDotFeatures *)rhs)->get_computed_dot_feature_vector(idx_b);
+	std::cout<<__FILE__<<" at "<<__LINE__<<"("<<idx_a<<","<<idx_b<<")"<<std::endl;
 	linalg::add(avec, bvec, avec, 1.0, -1.0);
+	showvec(avec);
 	float64_t result=compute_helper(avec, avec);
 	return result/m_width;
 }
