@@ -17,6 +17,7 @@
 #include <shogun/modelselection/ModelSelectionParameters.h>
 #include <shogun/machine/Machine.h>
 #include <nlopt.h>
+#include <shogun/mathematics/Math.h>
 
 using namespace shogun;
 
@@ -68,12 +69,12 @@ double nlopt_function(unsigned n, const double* x, double* grad, void* func_data
 		CSGObject* parent=node->data;
 
 		if (param->m_datatype.m_ctype==CT_VECTOR ||
-				param->m_datatype.m_ctype==CT_SGVECTOR)
+				param->m_datatype.m_ctype==CT_SGVECTOR ||
+				param->m_datatype.m_ctype==CT_SGMATRIX ||
+				param->m_datatype.m_ctype==CT_MATRIX)
 		{
-			REQUIRE(param->m_datatype.m_length_y, "Parameter vector %s has no "
-					"length\n", param->m_name)
 
-			for (index_t j=0; j<*(param->m_datatype.m_length_y); j++)
+			for (index_t j=0; j<param->m_datatype.get_num_elements(); j++)
 			{
 
 				bool result=current_combination->set_parameter(param->m_name,
@@ -83,7 +84,7 @@ double nlopt_function(unsigned n, const double* x, double* grad, void* func_data
 			}
 		}
 		else
-		{
+
 			bool result=current_combination->set_parameter(param->m_name,
 					(float64_t)x[offset++], parent);
 			REQUIRE(result, "Parameter %s not found in combination tree\n",
@@ -94,6 +95,11 @@ double nlopt_function(unsigned n, const double* x, double* grad, void* func_data
 	// apply current combination to the machine
 	CMachine* machine=machine_eval->get_machine();
 	current_combination->apply_to_machine(machine);
+	if (print_state)
+	{
+		SG_SPRINT("Current combination\n");
+		current_combination->print_tree();
+	}
 	SG_UNREF(machine);
 
 	// evaluate the machine
@@ -104,6 +110,7 @@ double nlopt_function(unsigned n, const double* x, double* grad, void* func_data
 
 	if (print_state)
 	{
+		SG_SPRINT("Current result\n");
 		gradient_result->print_result();
 	}
 
@@ -218,6 +225,7 @@ CParameterCombination* CGradientModelSelection::select_model(bool print_state)
 		// optimization algorithm
 		nlopt_opt opt=nlopt_create(NLOPT_LD_MMA, total_variables);
 
+		// currently we assume all parameters are positive
 		// create lower bound vector (lb=-inf)
 		SGVector<double> lower_bound(total_variables);
 		lower_bound.set_const(1e-6);
