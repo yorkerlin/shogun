@@ -78,7 +78,7 @@ public:
 	 * @param size cache size
 	 * @param width kernel width
 	 */
-	CGaussianARDFITCKernel(int32_t size, float64_t width);
+	CGaussianARDFITCKernel(int32_t size);
 
 	/** constructor
 	 *
@@ -88,7 +88,7 @@ public:
 	 * @param width kernel width
 	 */
 	CGaussianARDFITCKernel(CDotFeatures* l, CDotFeatures* r,
-		int32_t size=10, float64_t width=2.0);
+		int32_t size=10);
 
 
 	/** @param kernel is casted to CGaussianARDFITCKernel, error if not possible
